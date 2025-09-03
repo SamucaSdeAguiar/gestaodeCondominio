@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Área do Morador - Residencial Santiago</title>
+<link href="abaMorador.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.min.js"></script>
+</head>
+<body>
+<button class="back-button" onclick="window.location.href='index.html'">Voltar</button>
+<header>Área do Morador - Residencial Santiago</header>
+<nav id="userNav"></nav>
+
+<div class="container">
+  <div class="welcome-hero">
+    <div class="welcome-text" id="welcomeText">Bem-vindo(a), Morador!</div>
+    <div class="welcome-img">
+      <img src="" alt="" />
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="avisos">Avisos</button>
+    <button class="tab-btn" data-tab="manutencao">Manutenção</button>
+    <button class="tab-btn" data-tab="pagamentos">Pagamentos</button>
+    <button class="tab-btn" data-tab="apartamento">Apartamento</button>
+  </div>
+
+  <div id="avisos" class="tab-content active notice-section">
+    <h2>Avisos do Gerente</h2>
+    <div class="avisos" id="listaAvisos"></div>
+  </div>
+
+  <div id="manutencao" class="tab-content maintenance-section">
+    <h2>Solicitar Manutenção</h2>
+    <form id="maintenanceForm">
+      <input type="text" id="assunto" placeholder="Assunto da manutenção" required />
+      <textarea id="descricao" placeholder="Descreva o problema" rows="4" required></textarea>
+      <button type="submit">Enviar Solicitação</button>
+    </form>
+    <div class="maintenance-list" id="listaManutencao"></div>
+  </div>
+
+  <div id="pagamentos" class="tab-content payment-section">
+    <h2>Pagamentos</h2>
+    <p>Valor do aluguel: <strong>R$ 1.500,00</strong></p>
+    <div class="pagamentos" id="listaPagamentos">
+      <div class="pagamento pago">
+        <h3>Janeiro 2025 - R$1500,00</h3>
+        <p>Status: <strong>Pago ✅</strong></p>
+        <small>01/01/2025</small>
+      </div>
+      <div class="pagamento nao-pago">
+        <h3>Fevereiro 2025 - R$1500,00</h3>
+        <p>Status: <strong>Não Pago ❌</strong></p>
+        <button class="btnPagar">Pagar Agora</button>
+        <small>05/02/2025</small>
+      </div>
+      <div class="pagamento nao-pago">
+        <h3>Março 2025 - R$1500,00</h3>
+        <p>Status: <strong>Não Pago ❌</strong></p>
+        <button class="btnPagar">Pagar Agora</button>
+        <small>05/03/2025</small>
+      </div>
+    </div>
+  </div>
+
+  <div id="apartamento" class="tab-content apartment-section">
+    <h2>Informações do Apartamento</h2>
+    <p id="infoBloco"></p>
+    <p id="infoApartamento"></p>
+  </div>
+</div>
+
+<script>
+// Controle de login
+let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+const userNav = document.getElementById('userNav');
+if(!currentUser || currentUser.tipo!=='morador'){
+  window.location.href='entrar.html';
+}else{
+  userNav.innerHTML=`<span>${currentUser.nome} (${currentUser.tipo})</span>
+  <button class="btn" id="logoutBtn">Sair</button>`;
+  document.getElementById('logoutBtn').addEventListener('click',()=>{
+    localStorage.removeItem('currentUser');
+    window.location.href='entrar.html';
+  });
+  document.getElementById('welcomeText').innerText=`Bem-vindo(a), ${currentUser.nome}!`;
+  document.getElementById('infoBloco').innerText=`Bloco: ${currentUser.bloco}`;
+  document.getElementById('infoApartamento').innerText=`Apartamento: ${currentUser.apartamento}`;
+}
+
+// Abas
+const tabs = document.querySelectorAll('.tab-btn');
+const contents = document.querySelectorAll('.tab-content');
+tabs.forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    tabs.forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const tabId=tab.dataset.tab;
+    contents.forEach(c=>c.id===tabId?c.classList.add('active'):c.classList.remove('active'));
+  });
+});
+
+// Supabase
+const supabaseUrl="SUA_URL_DO_SUPABASE";
+const supabaseKey="SUA_CHAVE_PUBLICA";
+const supabase=supabase.createClient(supabaseUrl,supabaseKey);
+
+// Avisos
+async function carregarAvisos(){
+  const {data,error}=await supabase.from("avisos").select("*").order("data_criacao",{ascending:false});
+  const lista=document.getElementById("listaAvisos");
+  lista.innerHTML="";
+  if(error){lista.innerHTML="Erro ao carregar avisos.";console.error(error);return;}
+  data.forEach(aviso=>{
+    const div=document.createElement("div");
+    div.classList.add("aviso");
+    div.innerHTML=`<h3>${aviso.titulo}</h3><p>${aviso.mensagem}</p><small>${new Date(aviso.data_criacao).toLocaleString()}</small>`;
+    lista.appendChild(div);
+  });
+}
+carregarAvisos();
+
+// Manutenção
+const maintenanceForm=document.getElementById('maintenanceForm');
+const listaManutencao=document.getElementById('listaManutencao');
+maintenanceForm.addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const assunto=document.getElementById('assunto').value;
+  const descricao=document.getElementById('descricao').value;
+  const {data,error}=await supabase.from('manutencoes').insert([
+    {usuario_id:currentUser.email,assunto,descricao,data_criacao:new Date()}
+  ]);
+  if(error){alert("Erro ao enviar solicitação.");console.error(error);return;}
+  alert("Solicitação enviada!");
+  maintenanceForm.reset();
+  carregarManutencoes();
+});
+async function carregarManutencoes(){
+  const {data,error}=await supabase.from('manutencoes').select("*").order("data_criacao",{ascending:false});
+  listaManutencao.innerHTML="";
+  if(error){listaManutencao.innerHTML="Erro ao carregar solicitações.";console.error(error);return;}
+  data.filter(m=>m.usuario_id===currentUser.email).forEach(m=>{
+    const div=document.createElement("div");
+    div.classList.add("maintenance-item");
+    div.innerHTML=`<h3>${m.assunto}</h3><p>${m.descricao}</p><small>${new Date(m.data_criacao).toLocaleString()}</small>`;
+    listaManutencao.appendChild(div);
+  });
+}
+carregarManutencoes();
+
+// Pagamentos (comentado para evitar conflito com dados estáticos)
+// const listaPagamentos=document.getElementById('listaPagamentos');
+// async function carregarPagamentos(){
+//   const {data,error}=await supabase.from('pagamentos').select("*").order("data_pagamento",{ascending:false});
+//   listaPagamentos.innerHTML="";
+//   if(error){listaPagamentos.innerHTML="Erro ao carregar pagamentos.";console.error(error);return;}
+//   const userPayments=data.filter(p=>p.usuario_id===currentUser.email);
+//   if(userPayments.length===0){listaPagamentos.innerHTML="<p>Nenhuma prestação registrada.</p>";return;}
+//   userPayments.forEach(p=>{
+//     const div=document.createElement("div");
+//     div.classList.add("pagamento", p.pago?'pago':'nao-pago');
+//     div.innerHTML=`
+//       <h3>${p.mes} - R$${p.valor}</h3>
+//       <p>Status: <strong>${p.pago?'Pago ✅':'Não Pago ❌'}</strong></p>
+//       ${!p.pago?'<button class="btnPagar">Pagar Agora</button>':''}
+//       <small>${new Date(p.data_pagamento).toLocaleDateString()}</small>
+//     `;
+//     listaPagamentos.appendChild(div);
+
+//     if(!p.pago){
+//       const btn=div.querySelector('.btnPagar');
+//       btn.addEventListener('click',async()=>{
+//         btn.disabled=true;
+//         btn.innerText='Processando...';
+//         const {data:updated,error:updateError}=await supabase.from('pagamentos').update({pago:true}).eq('id',p.id);
+//         if(updateError){alert('Erro ao processar pagamento.');console.error(updateError);btn.disabled=false;btn.innerText='Pagar Agora';return;}
+//         div.classList.remove('nao-pago');
+//         div.classList.add('pago');
+//         div.querySelector('p strong').innerText='Pago ✅';
+//         btn.style.transition='opacity 0.5s';
+//         btn.style.opacity='0';
+//         setTimeout(()=>btn.remove(),500);
+//       });
+//     }
+//   });
+// }
+// carregarPagamentos();
+
+// Para funcionamento dos botões "Pagar Agora" nos dados estáticos:
+document.querySelectorAll('.btnPagar').forEach(btn=>{
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    btn.innerText = 'Processando...';
+    setTimeout(() => {
+      const pagamentoDiv = btn.closest('.pagamento');
+      pagamentoDiv.classList.remove('nao-pago');
+      pagamentoDiv.classList.add('pago');
+      pagamentoDiv.querySelector('p strong').innerText = 'Pago ✅';
+      btn.style.transition = 'opacity 0.5s';
+      btn.style.opacity = '0';
+      setTimeout(() => btn.remove(), 500);
+    }, 1500);
+  });
+});
+</script>
+</body>
+</html>

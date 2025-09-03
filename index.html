@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Residencial — Seu novo lar</title>
+  <meta name="description" content="Condomínio clube com lazer completo, segurança 24h e localização privilegiada. Conheça o Residencial Santiago." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="index.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <a class="brand" href="#">
+      <span class="brand-badge">RS</span>
+      Residencial Santiago
+    </a>
+    <nav aria-label="Ações de conta" id="userArea">
+      <!-- Botões serão atualizados pelo JS -->
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero e seções permanecem iguais -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div>
+          <span class="tag" aria-label="Destaque">LANÇAMENTO</span>
+          <br><br>
+          <h1 class="headline">Um condomínio clube pensado para o seu conforto e bem‑estar.</h1>
+          <p class="sub">No Residencial Santiago você encontra lazer completo, segurança 24h e uma localização estratégica para viver perto de tudo. Arquitetura moderna, áreas verdes e uma vizinhança acolhedora esperam por você.</p>
+        </div>
+        <div class="hero-card">
+          <div class="hero-grid">
+            <div class="hero-item">
+              <span class="pill">LAZER</span>
+              <h4>Piscina, academia e salão gourmet</h4>
+              <p>Estrutura completa para relaxar e celebrar com quem você ama.</p>
+            </div>
+            <div class="hero-item">
+              <span class="pill">SEGURANÇA</span>
+              <h4>Portaria 24h e monitoramento</h4>
+              <p>Controle de acesso, câmeras e equipe treinada para sua tranquilidade.</p>
+            </div>
+            <div class="hero-item">
+              <span class="pill">LOCALIZAÇÃO</span>
+              <h4>Perto de tudo que importa</h4>
+              <p>Fácil acesso a escolas, mercados, centros comerciais e parques.</p>
+            </div>
+            <div class="hero-item">
+              <span class="pill">SUSTENTÁVEL</span>
+              <h4>Áreas verdes e eficiência</h4>
+              <p>Coleta seletiva, reaproveitamento de água e iluminação eficiente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="sobre">
+      <div class="container">
+        <h2 class="section-title">Sobre o Residencial Santiago</h2>
+        <p class="section-sub">Um projeto contemporâneo que combina sofisticação, praticidade e contato com a natureza. Apartamentos inteligentes com plantas bem distribuídas, varandas generosas e acabamentos de alto padrão.</p>
+
+        <div class="features" aria-label="Diferenciais do condomínio">
+          <article class="feature">
+            <span class="pill">CONVENIÊNCIA</span>
+            <h3>Espaços que simplificam o dia a dia</h3>
+            <p>Market 24h, coworking, bicicletário e lockers inteligentes para facilitar sua rotina.</p>
+          </article>
+          <article class="feature">
+            <span class="pill">BEM‑ESTAR</span>
+            <h3>Ambientes para o corpo e a mente</h3>
+            <p>Academia equipada, studio de yoga, playground e pet place para toda a família.</p>
+          </article>
+          <article class="feature">
+            <span class="pill">COMUNIDADE</span>
+            <h3>Vizinhança acolhedora e ativa</h3>
+            <p>Eventos mensais, feiras de produtores locais e áreas comuns convidativas.</p>
+          </article>
+        </div>
+
+        <div class="ribbon" role="note">
+          <p>Condições especiais de lançamento: entrada facilitada e parcelas que cabem no seu bolso. Fale com um consultor e simule agora.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container cta">
+        <div>
+          <h3 class="cta-title">Pronto para conhecer seu novo endereço?</h3>
+          <p>Agende uma visita presencial ou faça um tour virtual com nossos consultores.</p>
+        </div>
+        <div>
+          <a class="btn btn-solid" href="/contato.html">Quero falar com um consultor</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container" role="contentinfo">
+      © <span id="year"></span> Residencial Santiago. Todos os direitos reservados.
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Simulação de usuários cadastrados
+    let users = JSON.parse(localStorage.getItem('users')) || [
+      {nome:"Luis", tipo:"gerente"},
+      {nome:"Maria", tipo:"morador"}
+    ];
+
+    // Usuário logado
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+    const userArea = document.getElementById('userArea');
+
+    function updateHeader(){
+      if(currentUser){
+        userArea.innerHTML = `
+          <button class="btn btn-ghost" id="dashboardBtn">${currentUser.nome} - ${currentUser.tipo}</button>
+          <button class="btn btn-solid" id="logoutBtn">Sair</button>
+        `;
+        document.getElementById('dashboardBtn').addEventListener('click', ()=>{
+          if(currentUser.tipo==='gerente') window.location.href='drento_gerente.html';
+          else window.location.href='drento_morador.html';
+        });
+        document.getElementById('logoutBtn').addEventListener('click', ()=>{
+          localStorage.removeItem('currentUser');
+          currentUser = null;
+          updateHeader();
+        });
+      } else {
+        userArea.innerHTML = `
+          <a class="btn btn-ghost" href="/entrar.html">Entrar</a>
+          <a class="btn btn-solid" href="/registrar.html">Registrar</a>
+        `;
+      }
+    }
+
+    updateHeader();
+  </script>
+</body>
+</html>

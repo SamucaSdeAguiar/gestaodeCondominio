@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar - Residencial Santiago</title>
+  <link href="entrar.css" rel="stylesheet">
+</head>
+<body>
+  <button class="back-button" onclick="window.location.href='index.html'">Voltar</button>
+  <div class="container">
+    <h1 id="form-title">Entrar Morador</h1>
+    <div class="switch-buttons">
+      <button id="morador-btn" class="active">Morador</button>
+      <button id="gerente-btn" class="inactive">Gerente</button>
+    </div>
+    <form id="login-form">
+      <div id="formCampos">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="senha" placeholder="Senha" required>
+      </div>
+      <button type="submit" class="btn-submit">Entrar</button>
+    </form>
+  </div>
+
+  <script>
+    const moradorBtn = document.getElementById('morador-btn');
+    const gerenteBtn = document.getElementById('gerente-btn');
+    const formTitle = document.getElementById('form-title');
+    const formCampos = document.getElementById('formCampos');
+    const loginForm = document.getElementById('login-form');
+
+    // Função para atualizar os campos do formulário
+    function atualizarCampos(tipo) {
+      if(tipo === 'morador'){
+        formTitle.textContent = "Entrar Morador";
+        formCampos.innerHTML = `
+          <input type="text" name="nome" placeholder="Nome" required>
+          <input type="email" name="email" placeholder="Email" required>
+          <input type="password" name="senha" placeholder="Senha" required>
+        `;
+      } else {
+        formTitle.textContent = "Entrar Gerente";
+        formCampos.innerHTML = `
+          <input type="text" name="nome" placeholder="Nome" required>
+          <input type="email" name="email" placeholder="Email" required>
+          <input type="password" name="senha" placeholder="Senha" required>
+        `;
+      }
+    }
+
+    // Alternar Morador / Gerente
+    moradorBtn.addEventListener('click', () => {
+      moradorBtn.classList.add('active'); moradorBtn.classList.remove('inactive');
+      gerenteBtn.classList.add('inactive'); gerenteBtn.classList.remove('active');
+      atualizarCampos('morador');
+    });
+
+    gerenteBtn.addEventListener('click', () => {
+      gerenteBtn.classList.add('active'); gerenteBtn.classList.remove('inactive');
+      moradorBtn.classList.add('inactive'); moradorBtn.classList.remove('active');
+      atualizarCampos('gerente');
+    });
+
+    

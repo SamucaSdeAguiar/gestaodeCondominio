@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrar - Residencial Santiago</title>
+<link href="registrar.css" rel="stylesheet">
+</head>
+<body>
+<button class="back-button" onclick="window.location.href='index.html'">Voltar</button>
+<div class="container">
+  <h1 id="form-title">Registrar Morador</h1>
+  <div class="switch-buttons">
+    <button id="morador-btn" class="active">Morador</button>
+    <button id="gerente-btn" class="inactive">Gerente</button>
+  </div>
+  <form id="register-form">
+    <div id="formCampos">
+      <input type="text" placeholder="Nome" required>
+      <input type="email" placeholder="Email" required>
+      <input type="password" placeholder="Senha" required>
+      <input type="text" placeholder="Bloco" required>
+      <input type="text" placeholder="Apartamento" required>
+    </div>
+    <button type="submit" class="btn-submit">Registrar</button>
+  </form>
+</div>
+
+<script>
+const moradorBtn = document.getElementById('morador-btn');
+const gerenteBtn = document.getElementById('gerente-btn');
+const formTitle = document.getElementById('form-title');
+const formCampos = document.getElementById('formCampos');
+
+moradorBtn.addEventListener('click', ()=>{
+  moradorBtn.classList.add('active'); moradorBtn.classList.remove('inactive');
+  gerenteBtn.classList.add('inactive'); gerenteBtn.classList.remove('active');
+  formTitle.textContent = "Registrar Morador";
+  formCampos.innerHTML = `
+    <input type="text" placeholder="Nome" required>
+    <input type="email" placeholder="Email" required>
+    <input type="password" placeholder="Senha" required>
+    <input type="text" placeholder="Bloco" required>
+    <input type="text" placeholder="Apartamento" required>
+  `;
+});
+
+gerenteBtn.addEventListener('click', ()=>{
+  gerenteBtn.classList.add('active'); gerenteBtn.classList.remove('inactive');
+  moradorBtn.classList.add('inactive'); moradorBtn.classList.remove('active');
+  formTitle.textContent = "Registrar Gerente";
+  formCampos.innerHTML = `
+    <input type="text" placeholder="Nome" required>
+    <input type="email" placeholder="Email" required>
+    <input type="password" placeholder="Senha" required>
+    <input type="password" placeholder="Senha do gerente" required>
+  `;
+});
+
+document.getElementById('register-form').addEventListener('submit', e=>{
+  e.preventDefault();
+  
+  const campos = formCampos.querySelectorAll('input');
+  const nome = campos[0].value.trim();
+  const email = campos[1].value.trim();
+  const senha = campos[2].value.trim();
+  
+  const isGerente = gerenteBtn.classList.contains('active');
+
+  if(isGerente){
+    const senhaGerente = campos[3].value.trim();
+    if(senhaGerente !== "hinin"){
+      alert("Senha do gerente incorreta!");
+      return;
+    }
+    // Salvar gerente logado
+    localStorage.setItem('currentUser', JSON.stringify({nome, email, tipo:'gerente'}));
+    window.location.href = 'drento_gerente.html';
+  } else {
+    const bloco = campos[3].value.trim();
+    const apartamento = campos[4].value.trim();
+    // Salvar morador logado com bloco e apartamento
+    localStorage.setItem('currentUser', JSON.stringify({nome, email, tipo:'morador', bloco, apartamento}));
+    window.location.href = 'drento_morador.html';
+  }
+});
+</script>
+</body>
+</html>

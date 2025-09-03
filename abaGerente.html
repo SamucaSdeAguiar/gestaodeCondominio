@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Área do Gerente - Residencial Santiago</title>
+  <link href="abaGerente.css" rel="stylesheet">
+</head>
+<body>
+
+  <button class="back-button" onclick="window.location.href='index.html'">Voltar</button>
+  <header>Área do Gerente - Residencial Santiago</header>
+
+  <div class="container">
+    <div class="welcome-hero">
+      <div class="welcome-text">
+        Bem-vindo, Gerente! Aqui você pode gerenciar todos os aspectos do Residencial Santiago com facilidade e segurança.
+      </div>
+      <div class="welcome-img">
+        <img src="/imagens/download-removebg-preview.png" alt="Imagem de boas-vindas">
+      </div>
+    </div>
+
+    <!-- Blocos -->
+    <div class="accordion">
+      <div class="accordion-header"><span>Blocos</span><span class="arrow">&#9654;</span></div>
+      <div class="accordion-content">
+        <div class="lista" id="listaBlocos"></div>
+        <input type="text" id="novoBloco" placeholder="Nome do bloco">
+        <button class="btn" id="addBloco">Adicionar Bloco</button>
+      </div>
+    </div>
+
+    <!-- Apartamentos -->
+    <div class="accordion">
+      <div class="accordion-header"><span>Apartamentos</span><span class="arrow">&#9654;</span></div>
+      <div class="accordion-content">
+        <div id="listaApartamentos"></div>
+        <select id="blocoSelect"></select>
+        <input type="text" id="novoApto" placeholder="Número do apartamento">
+        <button class="btn" id="addApto">Adicionar Apartamento</button>
+      </div>
+    </div>
+
+    <!-- Moradores -->
+    <div class="accordion">
+      <div class="accordion-header"><span>Moradores</span><span class="arrow">&#9654;</span></div>
+      <div class="accordion-content">
+        <div class="lista" id="listaMoradores"></div>
+        <input type="text" id="nomeMorador" placeholder="Nome">
+        <input type="text" id="cpfMorador" placeholder="CPF">
+        <input type="text" id="telefoneMorador" placeholder="Telefone">
+        <select id="aptoSelect"></select>
+        <button class="btn" id="addMorador">Adicionar Morador</button>
+      </div>
+    </div>
+
+    <!-- Manutenção -->
+    <div class="accordion">
+      <div class="accordion-header"><span>Manutenção</span><span class="arrow">&#9654;</span></div>
+      <div class="accordion-content">
+        <select id="blocoManutencao"></select>
+        <select id="aptoManutencao"></select>
+        <select id="tipoManutencao">
+          <option value="encanamento">Encanamento</option>
+          <option value="tinta">Tinta</option>
+          <option value="gas">Gás</option>
+          <option value="infestacao">Infestação</option>
+        </select>
+        <input type="date" id="dataManutencao">
+        <button class="btn" id="addManutencao">Registrar Manutenção</button>
+        <div class="lista" id="listaManutencao"></div>
+      </div>
+    </div>
+
+    <!-- Avisos -->
+    <div class="accordion">
+      <div class="accordion-header"><span>Avisos</span><span class="arrow">&#9654;</span></div>
+      <div class="accordion-content">
+        <input type="text" id="tituloAviso" placeholder="Título do aviso">
+        <textarea id="mensagemAviso" placeholder="Mensagem"></textarea>
+        <button class="btn" id="enviarAviso">Enviar Aviso</button>
+        <div class="avisos" id="listaAvisos"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.accordion').forEach(acc => {
+      const header = acc.querySelector('.accordion-header');
+      const content = acc.querySelector('.accordion-content');
+      const arrow = header.querySelector('.arrow');
+      header.addEventListener('click', () => {
+        const open = content.style.display === 'block';
+        content.style.display = open ? 'none' : 'block';
+        arrow.classList.toggle('open', !open);
+      });
+    });
+
+    let blocos = ['A', 'B'],
+        apartamentos = { A: [101, 102], B: [201, 202] },
+        moradores = [],
+        manutencoes = [],
+        avisos = [];
+
+    const listaBlocos = document.getElementById('listaBlocos');
+    const blocoSelect = document.getElementById('blocoSelect');
+    const blocoManut = document.getElementById('blocoManutencao');
+    const aptoManut = document.getElementById('aptoManutencao');
+    const listaApartamentos = document.getElementById('listaApartamentos');
+    const listaMoradores = document.getElementById('listaMoradores');
+    const listaManutencao = document.getElementById('listaManutencao');
+    const listaAvisos = document.getElementById('listaAvisos');
+
+    function atualizarBlocos() {
+      listaBlocos.innerHTML = '';
+      blocoSelect.innerHTML = '';
+      blocoManut.innerHTML = '';
+      blocos.forEach((b, i) => {
+        const div = document.createElement('div');
+        div.textContent = `Bloco ${b}`;
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'btn-group';
+        const edit = document.createElement('button');
+        edit.textContent = 'Editar';
+        edit.className = 'btn';
+        edit.onclick = () => {
+          const novo = prompt('Novo nome:', b);
+          if (novo) {
+            blocos[i] = novo;
+            apartamentos[novo] = apartamentos[b];
+            delete apartamentos[b];
+            atualizarBlocos();
+            atualizarApartamentos();
+          }
+        };
+        const del = document.createElement('button');
+        del.textContent = 'Excluir';
+        del.className = 'btn';
+        del.onclick = () => {
+          if (confirm('Excluir bloco?')) {
+            blocos.splice(i, 1);
+            delete apartamentos[b];
+            atualizarBlocos();
+            atualizarApartamentos();
+          }
+        };
+        btnGroup.append(edit, del);
+        div.appendChild(btnGroup);
+        listaBlocos.appendChild(div);
+        blocoSelect.add(new Option(b, b));
+        blocoManut.add(new Option(b, b));
+      });
+    }
+    atualizarBlocos();
+
+    function atualizarApartamentos() {
+      listaApartamentos.innerHTML = '';
+      blocos.forEach(b => {
+        const card = document.createElement('div');
+        card.className = 'subcard';
+        const title = document.createElement('h4');
+        title.textContent = 'Bloco ' + b;
+        card.appendChild(title);
+        const aptoList = document.createElement('div');
+        aptoList.className = 'apto-list';
+        apartamentos[b].forEach((a, idx) => {
+          const div = document.createElement('div');
+          div.textContent = 'Apto ' + a;
+          const btnGroup = document.createElement('div');
+          btnGroup.className = 'btn-group';
+          const edit = document.createElement('button');
+          edit.textContent = 'Editar';
+          edit.className = 'btn';
+          edit.onclick = () => {
+            const novo = prompt('Novo número:', a);
+            if (novo) {
+              apartamentos[b][idx] = novo;
+              atualizarApartamentos();
+            }
+          };
+          const del = document.createElement('button');
+          del.textContent = 'Excluir';
+          del.className = 'btn';
+          del.onclick = () => {
+            if (confirm('Excluir apartamento?')) {
+              apartamentos[b].splice(idx, 1);
+              atualizarApartamentos();
+            }
+          };
+          btnGroup.append(edit, del);
+          div.appendChild(btnGroup);
+          aptoList.appendChild(div);
+        });
+        card.appendChild(aptoList);
+        listaApartamentos.appendChild(card);
+      });
+    }
+    atualizarApartamentos();
+
+    blocoManut.addEventListener('change', () => {
+      aptoManut.innerHTML = '';
+      apartamentos[blocoManut.value].forEach(a => aptoManut.add(new Option(a, a)));
+    });
+
+    function atualizarMoradores() {
+      listaMoradores.innerHTML = '';
+      moradores.forEach((m, i) => {
+        const div = document.createElement('div');
+        div.textContent = `${m.nome} - Bloco ${m.bloco} Apto ${m.apto}`;
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'btn-group';
+        const edit = document.createElement('button');
+        edit.textContent = 'Editar';
+        edit.className = 'btn';
+        edit.onclick = () => {
+          const nome = prompt('Nome:', m.nome);
+          if (nome) {
+            moradores[i].nome = nome;
+            atualizarMoradores();
+          }
+        };
+        const del = document.createElement('button');
+        del.textContent = 'Excluir';
+        del.className = 'btn';
+        del.onclick = () => {
+          if (confirm('Excluir morador?')) {
+            moradores.splice(i, 1);
+            atualizarMoradores();
+          }
+        };
+        btnGroup.append(edit, del);
+        div.appendChild(btnGroup);
+        listaMoradores.appendChild(div);
+      });
+    }
+
+    function atualizarManutencao() {
+      listaManutencao.innerHTML = '';
+      manutencoes.forEach((m, i) => {
+        const div = document.createElement('div');
+        div.textContent = `Bloco ${m.bloco} - Apto ${m.apto} - ${m.tipo} - ${m.data}`;
+        const del = document.createElement('button');
+        del.textContent = 'Excluir';
+        del.className = 'btn';
+        del.onclick = () => {
+          manutencoes.splice(i, 1);
+          atualizarManutencao();
+        };
+        div.appendChild(del);
+        listaManutencao.appendChild(div);
+      });
+    }
+
+    function atualizarAvisos() {
+      listaAvisos.innerHTML = '';
+      avisos.forEach((a, i) => {
+        const div = document.createElement('div');
+        div.className = 'aviso';
+        div.innerHTML = `<strong>${a.titulo}</strong>: ${a.mensagem}`;
+        const del = document.createElement('button');
+        del.textContent = 'Excluir';
+        del.className = 'btn';
+        del.onclick = () => {
+          avisos.splice(i, 1);
+          atualizarAvisos();
+        };
+        div.appendChild(del);
+        listaAvisos.appendChild(div);
+      });
+    }
+
+    document.getElementById('addBloco').onclick = () => {
+      const nome = document.getElementById('novoBloco').value.trim();
+      if (nome && !blocos.includes(nome)) {
+        blocos.push(nome);
+        apartamentos[nome] = [];
+        atualizarBlocos();
+        atualizarApartamentos();
+      }
+    };
+
+    document.getElementById('addApto').onclick = () => {
+      const bloco = blocoSelect.value,
+        apto = document.getElementById('novoApto').value.trim();
+      if (apto) {
+        apartamentos[bloco].push(apto);
+        atualizarApartamentos();
+      }
+    };
+
+    document.getElementById('addMorador').onclick = () => {
+      const nome = document.getElementById('nomeMorador').value,
+        cpf = document.getElementById('cpfMorador').value,
+        tel = document.getElementById('telefoneMorador').value;
+      const bloco = blocoSelect.value,
+        apto = document.getElementById('novoApto').value;
+      if (nome && cpf && tel) {
+        moradores.push({ nome, cpf, telefone: tel, bloco, apto });
+        atualizarMoradores();
+      }
+    };
+
+    document.getElementById('addManutencao').onclick = () => {
+      const bloco = blocoManut.value,
+        apto = aptoManut.value,
+        tipo = document.getElementById('tipoManutencao').value,
+        data = document.getElementById('dataManutencao').value;
+      if (bloco && apto && tipo && data) {
+        manutencoes.push({ bloco, apto, tipo, data });
+        atualizarManutencao();
+      }
+    };
+
+    document.getElementById('enviarAviso').onclick = () => {
+      const titulo = document.getElementById('tituloAviso').value,
+        mensagem = document.getElementById('mensagemAviso').value;
+      if (titulo && mensagem) {
+        avisos.push({ titulo, mensagem });
+        atualizarAvisos();
+      }
+    };
+  </script>
+
+</body>
+</html>
